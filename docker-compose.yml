@@ -1,0 +1,30 @@
+services:
+  vllm:
+    image: vllm/vllm-openai-rocm:v0.32.0
+    ports:
+      - "8000:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+      - HSA_TOOLS_DISABLE_REGISTER=1
+      - HSA_ENABLE_INTERRUPT=1
+    ipc: host
+    devices:
+      - "/dev/kfd:/dev/kfd"
+      - "/dev/dri:/dev/dri"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    command: >
+      --model qwen/Qwen2.5-7B-Instruct-AWQ
+      --host 0.0.0.0
+      --port 8000
+      --max-model-len 8192
+      --max-num-seqs 32
+      --enable-sleep-mode
+      --gpu-memory-utilization 0.9
+
+volumes:
+  huggingface-cache:
